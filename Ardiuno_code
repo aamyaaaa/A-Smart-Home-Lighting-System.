@@ -1,0 +1,48 @@
+// Pin Definitions
+const int pirPin = 2;     // PIR motion sensor connected to digital pin 2
+const int ldrPin = A0;    // LDR connected to analog pin A0
+const int ledPin = 9;     // LED connected to digital pin 9 (PWM pin)
+int ldrValue = 0;         // Variable to store LDR value
+int motionDetected = 0;   // Variable to store PIR sensor state
+
+// Thresholds
+const int lightThreshold = 500;  // Set a threshold for LDR value (ambient light)
+
+void setup() {
+  pinMode(pirPin, INPUT);   // PIR sensor as input
+  pinMode(ledPin, OUTPUT);  // LED as output
+  Serial.begin(9600);       // Start serial communication for debugging
+}
+
+void loop() {
+  // Read the PIR sensor value (HIGH when motion is detected)
+  motionDetected = digitalRead(pirPin);
+
+  // Read the LDR sensor value (light intensity)
+  ldrValue = analogRead(ldrPin);
+
+  // Case 1: No Light Outside + Motion Detected (Turn on LED at Full Brightness)
+  if (motionDetected == HIGH && ldrValue < lightThreshold) {
+    analogWrite(ledPin, 255); // Full brightness
+    Serial.println("Motion detected and low light: LED Full brightness");
+  }
+  // Case 2: No Light Outside + No Motion (Dim the LED)
+  else if (motionDetected == LOW && ldrValue < lightThreshold) {
+    analogWrite(ledPin, 100);  // Dim the LED
+    Serial.println("No motion, but low light: LED Dimmed");
+  }
+  // Case 3: Light Outside (Regardless of Motion, Turn Off the LED)
+  else if (ldrValue >= lightThreshold) {
+    analogWrite(ledPin, 0);  // Turn off the LED
+    Serial.println("Sufficient ambient light: LED Off");
+  }
+
+  // Debugging output
+  Serial.print("LDR Value: ");
+  Serial.println(ldrValue);
+  Serial.print("Motion Detected: ");
+  Serial.println(motionDetected);
+
+  delay(500); // Delay for half a second for faster response
+}
+
