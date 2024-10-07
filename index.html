@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Lighting Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .status { margin: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Smart Lighting System</h1>
+    <div class="status">
+        <p>Motion Detected: <span id="motion"></span></p>
+        <p>Ambient Light Level: <span id="light"></span></p>
+        <p>LED Brightness: <span id="brightness"></span></p>
+        <p>LED Status: <span id="led-status"></span></p>
+    </div>
+
+    <script>
+        // Fetch data from Node.js API
+        fetch('/lighting-status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('motion').textContent = data.motion_detected ? 'Yes' : 'No';
+            document.getElementById('light').textContent = data.ambient_light;
+            document.getElementById('brightness').textContent = data.led_brightness;
+            document.getElementById('led-status').textContent = data.led_status;
+        })
+        .catch(err => {
+            console.error('Error fetching data:', err);
+        });
+    </script>
+</body>
+</html>
