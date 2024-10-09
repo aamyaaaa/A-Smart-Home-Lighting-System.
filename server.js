@@ -1,7 +1,23 @@
 const express = require('express');
+const helmet = require('helmet'); // Helmet for security
+const fs = require('fs'); // To read SSL certificates
+const https = require('https'); // HTTPS module
 const { MongoClient } = require('mongodb');
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
+// SSL Certificates for HTTPS
+onst privateKey = fs.readFileSync(__dirname + '/key.pem', 'utf8');
+const certificate = fs.readFileSync(__dirname + '/cert.pem', 'utf8');
+
+const credentials = { key: privateKey, cert: certificate };
+
+// Use Helmet to secure HTTP headers
+app.use(helmet());
+
+// Serve static files from the 'public' folder
+app.use(express.static('public'));
 
 // MongoDB connection URI
 const uri = 'mongodb+srv://guptaaamya1204:Jo3dymy1XhaOhDDk@cluster0.qkvpo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
@@ -21,7 +37,7 @@ app.get('/lighting-status', async (req, res) => {
   // Simulate motion and ambient light
   const motionDetected = Math.random() > 0.5 ? 1 : 0;
   const ambientLight = Math.floor(Math.random() * 1000);
-  
+
   // LED control logic
   let ledBrightness;
   let ledStatus;
@@ -56,6 +72,14 @@ app.get('/lighting-status', async (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Smart Lighting app listening at http://localhost:${port}`);
+// Serve your HTML file (from 'public' folder)
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+// Create an HTTPS server
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(port, () => {
+  console.log(`Smart Lighting app listening at https://localhost:${port}`);
 });
